@@ -20,7 +20,7 @@
 #include "torch-mlir/Dialect/TorchConversion/IR/TorchConversionDialect.h"
 
 #include "mlir/Dialect/Arithmetic/IR/Arithmetic.h"
-#include "mlir/Dialect/Linalg/IR/LinalgOps.h"
+#include "mlir/Dialect/Linalg/IR/Linalg.h"
 #include "mlir/Dialect/Linalg/Transforms/Transforms.h"
 #include "mlir/Dialect/MemRef/IR/MemRef.h"
 #include "mlir/Dialect/SCF/SCF.h"
@@ -831,13 +831,6 @@ public:
   XTenToLinalgPass() = default;
   XTenToLinalgPass(const XTenToLinalgPass &pass){};
 
-  void getDependentDialects(::mlir::DialectRegistry &registry) const override {
-    registry.insert<memref::MemRefDialect>();
-    registry.insert<linalg::LinalgDialect>();
-    registry
-        .insert<Torch::TorchDialect, TorchConversion::TorchConversionDialect>();
-  }
-
   void runOnOperation() override {
 
     auto module = getOperation();
@@ -846,7 +839,7 @@ public:
     TypeConverter typeConverter;
 
     // tablegen patterns
-    OwningRewritePatternList patterns(context);
+    RewritePatternSet patterns(context);
 
     patterns.insert<XTenAddOpConversion, XTenMulOpConversion,
                     XTenMMOpConversion, XTenConv2dOpConversion,
